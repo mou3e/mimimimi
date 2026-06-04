@@ -120,6 +120,12 @@ h2 {
   gap: 12px;
 }
 
+.messageForm {
+  display: grid;
+  grid-template-columns: minmax(130px, 0.4fr) minmax(0, 1fr) auto;
+  gap: 12px;
+}
+
 label {
   display: grid;
   gap: 7px;
@@ -194,6 +200,40 @@ select option {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 12px;
+}
+
+.messagesList {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.messageItem {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  padding: 12px;
+}
+
+.messageTop {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.messageTop strong {
+  font-size: 16px;
+}
+
+.messageTop small {
+  color: var(--muted);
+}
+
+.messageItem p {
+  margin-top: 8px;
+  color: #e8edf5;
+  line-height: 1.55;
 }
 
 .friendCard {
@@ -290,6 +330,10 @@ select option {
   }
 
   .profileForm {
+    grid-template-columns: 1fr;
+  }
+
+  .messageForm {
     grid-template-columns: 1fr;
   }
 

@@ -2,6 +2,44 @@ const config = window.MIMIMIMI_SUPABASE || {};
 const hasConfig = Boolean(config.url && config.anonKey && !config.anonKey.includes("PASTE_"));
 const storageKey = "mimimimi-supabase-profile-id";
 
+const text = {
+  connected: "\u5df2\u540c\u6b65",
+  disconnected: "\u672a\u8fde\u63a5",
+  reading: "\u6b63\u5728\u8bfb\u53d6\u6700\u65b0\u72b6\u6001...",
+  readOk: "\u5df2\u8bfb\u53d6\u6700\u65b0\u72b6\u6001\u3002",
+  realtimeOk: "\u5b9e\u65f6\u540c\u6b65\u5df2\u8fde\u63a5\u3002",
+  noConfig: "\u8bf7\u5148\u5728 config.js \u91cc\u586b Supabase anon public key\u3002",
+  noClient: "\u8fd8\u6ca1\u8fde\u4e0a Supabase\u3002",
+  needNameCity: "\u540d\u5b57\u548c\u57ce\u5e02\u90fd\u8981\u586b\u3002",
+  saveOk: "\u4fdd\u5b58\u597d\u4e86\uff0c\u670b\u53cb\u4eec\u5237\u65b0\u540e\u5c31\u80fd\u770b\u5230\u3002",
+  noMood: "\u4eca\u5929\u8fd8\u6ca1\u53d1\u72b6\u6001",
+  noWindow: "\u672a\u8bbe\u7f6e\u804a\u5929\u65f6\u95f4",
+  noNote: "\u6ca1\u6709\u5c0f\u7eb8\u6761\u3002",
+  noFriends: "\u8fd8\u6ca1\u6709\u670b\u53cb\u52a0\u5165\u3002",
+  noMessages: "\u8fd8\u6ca1\u6709\u7559\u8a00\u3002",
+  newFriend: "\u65b0\u670b\u53cb",
+  messageSent: "\u7559\u8a00\u5df2\u53d1\u9001\u3002",
+  anonymous: "\u533f\u540d",
+  updatedAt: "\u66f4\u65b0\u4e8e",
+  deepNight: "\u6df1\u591c",
+  morning: "\u65e9\u6668",
+  noon: "\u5348\u95f4",
+  afternoon: "\u4e0b\u5348",
+  evening: "\u665a\u4e0a",
+  night: "\u591c\u91cc"
+};
+
+const zoneLabels = {
+  "America/Toronto": "Canada / Toronto",
+  "America/New_York": "USA / New York",
+  "America/Los_Angeles": "USA / California",
+  "Asia/Shanghai": "China / Kunming",
+  "Europe/London": "UK / London",
+  "Europe/Paris": "France / Paris",
+  "Asia/Tokyo": "Japan / Tokyo",
+  "Australia/Sydney": "Australia / Sydney"
+};
+
 const el = {
   form: document.querySelector("#profileForm"),
   name: document.querySelector("#nameInput"),
@@ -15,16 +53,21 @@ const el = {
   friendCount: document.querySelector("#friendCount"),
   awakeCount: document.querySelector("#awakeCount"),
   refresh: document.querySelector("#refreshButton"),
-  liveBadge: document.querySelector("#liveBadge")
+  liveBadge: document.querySelector("#liveBadge"),
+  messageForm: document.querySelector("#messageForm"),
+  messageName: document.querySelector("#messageNameInput"),
+  message: document.querySelector("#messageInput"),
+  messagesList: document.querySelector("#messagesList")
 };
 
 let client = null;
 let currentId = localStorage.getItem(storageKey);
 let rows = [];
+let messages = [];
 
-function setStatus(text, isError = false) {
-  el.status.textContent = text;
-  el.liveBadge.textContent = isError ? "未连接" : "已同步";
+function setStatus(value, isError = false) {
+  el.status.textContent = value;
+  el.liveBadge.textContent = isError ? text.disconnected : text.connected;
   el.liveBadge.classList.toggle("error", isError);
 }
 
@@ -41,12 +84,12 @@ function localDate(zone) {
 }
 
 function phaseFor(hour) {
-  if (hour < 6) return "深夜";
-  if (hour < 11) return "早晨";
-  if (hour < 14) return "午间";
-  if (hour < 18) return "下午";
-  if (hour < 22) return "晚上";
-  return "夜里";
+  if (hour < 6) return text.deepNight;
+  if (hour < 11) return text.morning;
+  if (hour < 14) return text.noon;
+  if (hour < 18) return text.afternoon;
+  if (hour < 22) return text.evening;
+  return text.night;
 }
 
 function escapeHtml(value) {
@@ -58,23 +101,27 @@ function escapeHtml(value) {
     .replaceAll("'", "&#039;");
 }
 
-function render() {
+function shortTime(value) {
+  return value ? new Date(value).toLocaleString("zh-CN", { hour: "2-digit", minute: "2-digit" }) : "";
+}
+
+function renderFriends() {
   const decorated = rows.map((friend) => {
-    const time = localDate(friend.zone || "America/Toronto");
-    return { ...friend, time, phase: phaseFor(time.hour) };
+    const zone = friend.zone || "America/Toronto";
+    const time = localDate(zone);
+    return { ...friend, zone, zoneLabel: zoneLabels[zone] || zone, time, phase: phaseFor(time.hour) };
   });
 
   el.friendCount.textContent = String(decorated.length);
   el.awakeCount.textContent = String(decorated.filter((friend) => friend.time.hour >= 8 && friend.time.hour <= 23).length);
 
   if (!decorated.length) {
-    el.list.innerHTML = `<article class="empty">还没有朋友加入。</article>`;
+    el.list.innerHTML = `<article class="empty">${text.noFriends}</article>`;
     return;
   }
 
   el.list.innerHTML = decorated
     .map((friend) => {
-      const updated = friend.updated_at ? new Date(friend.updated_at).toLocaleString("zh-CN", { hour: "2-digit", minute: "2-digit" }) : "";
       return `
         <article class="friendCard">
           <div class="friendTop">
@@ -82,30 +129,67 @@ function render() {
             <span class="friendTime">${friend.time.label}</span>
           </div>
           <strong class="friendName">${escapeHtml(friend.name)}</strong>
-          <span class="friendMeta">${escapeHtml(friend.city)} · ${escapeHtml(friend.zone)}</span>
+          <span class="friendMeta">${escapeHtml(friend.city)} · ${escapeHtml(friend.zoneLabel)}</span>
           <div class="chips">
             <span class="chip">${friend.phase}</span>
-            <span class="chip">${escapeHtml(friend.chat_window || "未设置聊天时间")}</span>
-            <span class="chip">${escapeHtml(friend.mood || "今天还没发状态")}</span>
+            <span class="chip">${escapeHtml(friend.chat_window || text.noWindow)}</span>
+            <span class="chip">${escapeHtml(friend.mood || text.noMood)}</span>
           </div>
-          <span class="friendNote">${escapeHtml(friend.note || "没有小纸条。")}</span>
-          <small class="updatedAt">更新于 ${escapeHtml(updated)}</small>
+          <span class="friendNote">${escapeHtml(friend.note || text.noNote)}</span>
+          <small class="updatedAt">${text.updatedAt} ${escapeHtml(shortTime(friend.updated_at))}</small>
         </article>
       `;
     })
     .join("");
 }
 
+function renderMessages() {
+  if (!messages.length) {
+    el.messagesList.innerHTML = `<article class="empty">${text.noMessages}</article>`;
+    return;
+  }
+
+  el.messagesList.innerHTML = messages
+    .map((message) => {
+      return `
+        <article class="messageItem">
+          <div class="messageTop">
+            <strong>${escapeHtml(message.name || text.anonymous)}</strong>
+            <small>${escapeHtml(shortTime(message.created_at))}</small>
+          </div>
+          <p>${escapeHtml(message.body)}</p>
+        </article>
+      `;
+    })
+    .join("");
+}
+
+function render() {
+  renderFriends();
+  renderMessages();
+}
+
 async function loadFriends() {
   if (!client) return;
   const { data, error } = await client.from("friend_status").select("*").order("updated_at", { ascending: false }).limit(100);
   if (error) {
-    setStatus(`读取失败：${error.message}`, true);
+    setStatus(`读取朋友失败：${error.message}`, true);
     return;
   }
   rows = data || [];
-  render();
-  setStatus("已读取最新状态。");
+  renderFriends();
+  setStatus(text.readOk);
+}
+
+async function loadMessages() {
+  if (!client) return;
+  const { data, error } = await client.from("wall_messages").select("*").order("created_at", { ascending: false }).limit(80);
+  if (error) {
+    setStatus(`读取留言失败：${error.message}`, true);
+    return;
+  }
+  messages = data || [];
+  renderMessages();
 }
 
 function fillOwnProfile(row) {
@@ -116,6 +200,7 @@ function fillOwnProfile(row) {
   el.mood.value = row.mood || "";
   el.window.value = row.chat_window || "";
   el.note.value = row.note || "";
+  el.messageName.value = row.name || "";
 }
 
 async function loadOwnProfile() {
@@ -127,7 +212,7 @@ async function loadOwnProfile() {
 async function saveProfile(event) {
   event.preventDefault();
   if (!client) {
-    setStatus("还没填 Supabase anon key。", true);
+    setStatus(text.noClient, true);
     return;
   }
 
@@ -135,14 +220,14 @@ async function saveProfile(event) {
     name: el.name.value.trim(),
     city: el.city.value.trim(),
     zone: el.zone.value,
-    mood: el.mood.value.trim() || "新朋友",
+    mood: el.mood.value.trim() || text.newFriend,
     chat_window: el.window.value.trim() || "19:00-22:00",
     note: el.note.value.trim(),
     updated_at: new Date().toISOString()
   };
 
   if (!payload.name || !payload.city) {
-    setStatus("名字和城市都要填。", true);
+    setStatus(text.needNameCity, true);
     return;
   }
 
@@ -164,31 +249,63 @@ async function saveProfile(event) {
 
   currentId = result.data.id;
   localStorage.setItem(storageKey, currentId);
-  setStatus("保存好了，朋友们刷新后就能看到。");
+  el.messageName.value = result.data.name || "";
+  setStatus(text.saveOk);
   await loadFriends();
+}
+
+async function sendMessage(event) {
+  event.preventDefault();
+  if (!client) {
+    setStatus(text.noClient, true);
+    return;
+  }
+
+  const body = el.message.value.trim();
+  if (!body) return;
+
+  const payload = {
+    name: el.messageName.value.trim() || el.name.value.trim() || text.anonymous,
+    body,
+    created_at: new Date().toISOString()
+  };
+
+  const { error } = await client.from("wall_messages").insert(payload);
+  if (error) {
+    setStatus(`发送留言失败：${error.message}`, true);
+    return;
+  }
+
+  el.message.value = "";
+  setStatus(text.messageSent);
+  await loadMessages();
 }
 
 function subscribeToChanges() {
   client
-    .channel("friend-status-wall")
-    .on("postgres_changes", { event: "*", schema: "public", table: "friend_status" }, () => {
-      loadFriends();
-    })
+    .channel("mimimimi-friends")
+    .on("postgres_changes", { event: "*", schema: "public", table: "friend_status" }, loadFriends)
+    .on("postgres_changes", { event: "*", schema: "public", table: "wall_messages" }, loadMessages)
     .subscribe((status) => {
-      if (status === "SUBSCRIBED") setStatus("实时同步已连接。");
+      if (status === "SUBSCRIBED") setStatus(text.realtimeOk);
     });
 }
 
 function boot() {
   el.form.addEventListener("submit", saveProfile);
-  el.refresh.addEventListener("click", loadFriends);
+  el.messageForm.addEventListener("submit", sendMessage);
+  el.refresh.addEventListener("click", () => {
+    loadFriends();
+    loadMessages();
+  });
   setInterval(() => {
     render();
     loadFriends();
+    loadMessages();
   }, 30000);
 
   if (!hasConfig) {
-    setStatus("请先在 config.js 里填 Supabase anon public key。", true);
+    setStatus(text.noConfig, true);
     render();
     return;
   }
@@ -196,6 +313,7 @@ function boot() {
   client = window.supabase.createClient(config.url, config.anonKey);
   loadOwnProfile();
   loadFriends();
+  loadMessages();
   subscribeToChanges();
 }
 

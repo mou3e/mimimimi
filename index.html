@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -903,9 +902,9 @@
         </section>
 
         <section class="stats contextual-hidden" id="statsBlock" aria-label="Corpus statistics">
-          <div class="stat"><strong id="statRecords">5</strong><span>records</span></div>
+          <div class="stat"><strong id="statRecords">6</strong><span>records</span></div>
           <div class="stat"><strong id="statPrint">3</strong><span>text records</span></div>
-          <div class="stat"><strong id="statManuscript">2</strong><span>author records</span></div>
+          <div class="stat"><strong id="statManuscript">3</strong><span>author records</span></div>
           <div class="stat"><strong id="statEditions">11</strong><span>edition links</span></div>
         </section>
 
@@ -1111,6 +1110,39 @@ const RECORDS = [
     ],
     modern: "James and Kent, Margherita Cantelmo and Agostino Strozzi, I Tatti Studies in the Italian Renaissance 12 (2009).",
     heurist: "Record type: Author / Linked text: Defensione delle donne contro i maledici loro calunniatori"
+  },
+  {
+    id: "boccaccio-author",
+    type: "author",
+    primary: false,
+    transmission: "author",
+    title: "Giovanni Boccaccio",
+    subtitle: "Boccace; author of the Decameron",
+    author: "Giovanni Boccaccio",
+    translator: "",
+    year: "1313-1375",
+    genre: "Author record / Italian humanist writer",
+    period: "Fourteenth-century Italy; Trecento literary culture",
+    circulation: "Person record linked to the French reception of the Decameron",
+    description: "Giovanni Boccaccio was an Italian writer, poet, and humanist best known for the Decameron, a collection of one hundred tales framed by the 1348 plague in Florence. In the AQF corpus, he appears through the French transmission of Le Cameron.",
+    argument: "This author record clarifies the chain behind Le Cameron: Boccaccio is the original author, Laurent de Premierfait is the French translator, and later printers and publishers reshaped the text's circulation.",
+    keywords: "giovanni boccaccio boccace decameron le cameron cent nouvelles italian author humanist florence plague frame narrative women narrators laurent de premierfait translation author record",
+    fields: [
+      ["Birth / death", "Born 1313; died 1375."],
+      ["Field of activity", "Italian literature, humanism, prose narrative, poetry, classical and vernacular culture."],
+      ["Major work", "The Decameron, written ca. 1349-1353, became one of the most influential European prose narrative collections."],
+      ["AQF relevance", "The Decameron frame gives seven women narrative authority as speakers, rulers of the day, judges, and interpreters."],
+      ["French transmission", "Le Cameron is a French print descendant of Laurent de Premierfait's Middle French translation of Boccaccio's work."],
+      ["Authority control", "Use the BnF authority record for Boccace / Giovanni Boccaccio when linking the Heurist author field."]
+    ],
+    editions: [],
+    notes: [
+      "Boccaccio is not a Querelle author in the narrow sense, but Le Cameron belongs in the corpus because its reception and frame narrative stage female speech and judgment.",
+      "The author record should be distinguished from the translator record for Laurent de Premierfait.",
+      "For the website demo, this record makes the author-text relationship visible when users search Boccaccio."
+    ],
+    modern: "Linked authority source in your Le Cameron record: BnF authority record for Boccace, ark:/12148/cb11892479d.",
+    heurist: "Record type: Author / Linked text: Le Cameron autrement dit Les Cent Nouvelles / Role: original author"
   },
   {
     id: "vandenbusche-author",

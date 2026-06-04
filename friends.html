@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>跨时区朋友小宇宙</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="sky-panel" aria-label="朋友时区总览">
+        <div class="topbar">
+          <div>
+            <p class="eyebrow">Friends Across Time</p>
+            <h1>跨时区朋友小宇宙</h1>
+          </div>
+          <button class="icon-button" id="resetDemo" title="恢复示例数据" aria-label="恢复示例数据">↺</button>
+        </div>
+
+        <div class="time-ribbon" id="timeRibbon" aria-label="24小时时间带"></div>
+
+        <div class="orbit-wrap">
+          <img src="night-world.png" alt="" class="world-art" />
+          <div class="orbit" id="friendOrbit"></div>
+        </div>
+      </section>
+
+      <aside class="detail-panel" aria-label="朋友详情">
+        <div class="friend-card">
+          <div class="friend-head">
+            <div class="avatar" id="activeAvatar">M</div>
+            <div>
+              <h2 id="activeName">Maya</h2>
+              <p id="activePlace">Toronto · America/Toronto</p>
+            </div>
+          </div>
+          <div class="local-time">
+            <span id="activeTime">--:--</span>
+            <small id="activePhase">loading</small>
+          </div>
+          <div class="status-row">
+            <span id="activeMood">想聊天</span>
+            <span id="activeWindow">19:00-22:00</span>
+          </div>
+        </div>
+
+        <section class="tool-section">
+          <div class="section-title">
+            <h3>今日小纸条</h3>
+            <span id="noteCount">0</span>
+          </div>
+          <form id="noteForm" class="note-form">
+            <input id="noteInput" type="text" maxlength="80" placeholder="写一句给这个朋友醒来后看的话" />
+            <button type="submit">投递</button>
+          </form>
+          <div id="notesList" class="notes-list"></div>
+        </section>
+
+        <section class="tool-section">
+          <div class="section-title">
+            <h3>现在谁可能在线</h3>
+            <span id="awakeCount">0</span>
+          </div>
+          <div id="awakeList" class="awake-list"></div>
+        </section>
+
+        <section class="tool-section">
+          <div class="section-title">
+            <h3>添加朋友</h3>
+          </div>
+          <form id="friendForm" class="friend-form">
+            <label>
+              名字
+              <input id="friendName" required maxlength="18" placeholder="比如 Alex" />
+            </label>
+            <label>
+              城市
+              <input id="friendCity" required maxlength="24" placeholder="比如 London" />
+            </label>
+            <label>
+              时区
+              <select id="friendZone">
+                <option value="America/Toronto">Toronto</option>
+                <option value="America/New_York">New York / 纽约</option>
+                <option value="America/Los_Angeles">Los Angeles</option>
+                <option value="America/Los_Angeles">California / 加州</option>
+                <option value="Europe/London">London</option>
+                <option value="Europe/Paris">Paris</option>
+                <option value="Asia/Shanghai">Shanghai</option>
+                <option value="Asia/Shanghai">Kunming / 中国昆明</option>
+                <option value="Asia/Tokyo">Tokyo</option>
+                <option value="Australia/Sydney">Sydney</option>
+              </select>
+            </label>
+            <label>
+              方便聊天
+              <input id="friendWindow" maxlength="13" placeholder="19:00-22:00" />
+            </label>
+            <button type="submit">加入小宇宙</button>
+          </form>
+        </section>
+      </aside>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>

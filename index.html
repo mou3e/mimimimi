@@ -3,105 +3,115 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>跨时区朋友小宇宙</title>
-    <link rel="stylesheet" href="styles.css" />
+    <title>mimimimi</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #0a0d14;
+        --panel: #151a26;
+        --line: rgba(255, 255, 255, 0.14);
+        --text: #f5f0e8;
+        --muted: #aeb7c8;
+        --accent: #ffc56e;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: "Segoe UI", Arial, sans-serif;
+        background:
+          radial-gradient(circle at 18% 0%, rgba(255, 197, 110, 0.24), transparent 26rem),
+          radial-gradient(circle at 90% 18%, rgba(97, 180, 255, 0.18), transparent 28rem),
+          var(--bg);
+        color: var(--text);
+      }
+
+      main {
+        width: min(920px, calc(100% - 28px));
+        margin: 0 auto;
+        padding: 34px 0;
+      }
+
+      h1 {
+        margin: 0 0 8px;
+        font-size: clamp(34px, 10vw, 64px);
+        line-height: 1.02;
+        letter-spacing: 0;
+      }
+
+      p {
+        margin: 0;
+        color: var(--muted);
+        line-height: 1.55;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 12px;
+        margin-top: 28px;
+      }
+
+      a {
+        display: block;
+        min-height: 154px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: rgba(21, 26, 38, 0.88);
+        color: var(--text);
+        text-decoration: none;
+        padding: 18px;
+      }
+
+      a:hover,
+      a:focus-visible {
+        border-color: var(--accent);
+        outline: none;
+      }
+
+      strong {
+        display: block;
+        margin-bottom: 12px;
+        font-size: 22px;
+      }
+
+      span {
+        display: block;
+        color: var(--muted);
+        line-height: 1.5;
+      }
+
+      code {
+        display: inline-block;
+        margin-top: 14px;
+        color: var(--accent);
+        font-size: 13px;
+        word-break: break-all;
+      }
+    </style>
   </head>
   <body>
-    <main class="app-shell">
-      <section class="sky-panel" aria-label="朋友时区总览">
-        <div class="topbar">
-          <div>
-            <p class="eyebrow">Friends Across Time</p>
-            <h1>跨时区朋友小宇宙</h1>
-          </div>
-          <button class="icon-button" id="resetDemo" title="恢复示例数据" aria-label="恢复示例数据">↺</button>
-        </div>
+    <main>
+      <h1>mimimimi</h1>
+      <p>一个入口，分别打开朋友时区和 AQF 页面。</p>
 
-        <div class="time-ribbon" id="timeRibbon" aria-label="24小时时间带"></div>
+      <section class="grid" aria-label="网页链接">
+        <a href="./friends.html">
+          <strong>跨时区朋友小宇宙</strong>
+          <span>朋友时区、状态、小纸条和在线时间。</span>
+          <code>friends.html</code>
+        </a>
 
-        <div class="orbit-wrap">
-          <img src="night-world.png" alt="" class="world-art" />
-          <div class="orbit" id="friendOrbit"></div>
-        </div>
+        <a href="./corpus.html">
+          <strong>AQF Corpus Demo</strong>
+          <span>AQF 语料演示页面。</span>
+          <code>corpus.html</code>
+        </a>
       </section>
-
-      <aside class="detail-panel" aria-label="朋友详情">
-        <div class="friend-card">
-          <div class="friend-head">
-            <div class="avatar" id="activeAvatar">M</div>
-            <div>
-              <h2 id="activeName">Maya</h2>
-              <p id="activePlace">Toronto · America/Toronto</p>
-            </div>
-          </div>
-          <div class="local-time">
-            <span id="activeTime">--:--</span>
-            <small id="activePhase">loading</small>
-          </div>
-          <div class="status-row">
-            <span id="activeMood">想聊天</span>
-            <span id="activeWindow">19:00-22:00</span>
-          </div>
-        </div>
-
-        <section class="tool-section">
-          <div class="section-title">
-            <h3>今日小纸条</h3>
-            <span id="noteCount">0</span>
-          </div>
-          <form id="noteForm" class="note-form">
-            <input id="noteInput" type="text" maxlength="80" placeholder="写一句给这个朋友醒来后看的话" />
-            <button type="submit">投递</button>
-          </form>
-          <div id="notesList" class="notes-list"></div>
-        </section>
-
-        <section class="tool-section">
-          <div class="section-title">
-            <h3>现在谁可能在线</h3>
-            <span id="awakeCount">0</span>
-          </div>
-          <div id="awakeList" class="awake-list"></div>
-        </section>
-
-        <section class="tool-section">
-          <div class="section-title">
-            <h3>添加朋友</h3>
-          </div>
-          <form id="friendForm" class="friend-form">
-            <label>
-              名字
-              <input id="friendName" required maxlength="18" placeholder="比如 Alex" />
-            </label>
-            <label>
-              城市
-              <input id="friendCity" required maxlength="24" placeholder="比如 London" />
-            </label>
-            <label>
-              时区
-              <select id="friendZone">
-                <option value="America/Toronto">Toronto</option>
-                <option value="America/New_York">New York / 纽约</option>
-                <option value="America/Los_Angeles">Los Angeles</option>
-                <option value="America/Los_Angeles">California / 加州</option>
-                <option value="Europe/London">London</option>
-                <option value="Europe/Paris">Paris</option>
-                <option value="Asia/Shanghai">Shanghai</option>
-                <option value="Asia/Shanghai">Kunming / 中国昆明</option>
-                <option value="Asia/Tokyo">Tokyo</option>
-                <option value="Australia/Sydney">Sydney</option>
-              </select>
-            </label>
-            <label>
-              方便聊天
-              <input id="friendWindow" maxlength="13" placeholder="19:00-22:00" />
-            </label>
-            <button type="submit">加入小宇宙</button>
-          </form>
-        </section>
-      </aside>
     </main>
-
-    <script src="app.js"></script>
   </body>
 </html>

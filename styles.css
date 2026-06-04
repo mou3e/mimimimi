@@ -222,12 +222,30 @@ select option {
   gap: 10px;
 }
 
+.messageActions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .messageTop strong {
   font-size: 16px;
 }
 
 .messageTop small {
   color: var(--muted);
+}
+
+.replyButton {
+  min-height: 30px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--teal);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 750;
+  padding: 0 10px;
 }
 
 .messageItem p {

@@ -155,7 +155,10 @@ function renderMessages() {
         <article class="messageItem">
           <div class="messageTop">
             <strong>${escapeHtml(message.name || text.anonymous)}</strong>
-            <small>${escapeHtml(shortTime(message.created_at))}</small>
+            <div class="messageActions">
+              <small>${escapeHtml(shortTime(message.created_at))}</small>
+              <button type="button" class="replyButton" data-reply-to="${escapeHtml(message.name || text.anonymous)}">回复</button>
+            </div>
           </div>
           <p>${escapeHtml(message.body)}</p>
         </article>
@@ -281,6 +284,18 @@ async function sendMessage(event) {
   await loadMessages();
 }
 
+function startReply(event) {
+  const button = event.target.closest(".replyButton");
+  if (!button) return;
+
+  const name = button.dataset.replyTo || text.anonymous;
+  const prefix = `@${name} `;
+  if (!el.message.value.startsWith(prefix)) {
+    el.message.value = `${prefix}${el.message.value}`.trimEnd();
+  }
+  el.message.focus();
+}
+
 function subscribeToChanges() {
   client
     .channel("mimimimi-friends")
@@ -294,6 +309,7 @@ function subscribeToChanges() {
 function boot() {
   el.form.addEventListener("submit", saveProfile);
   el.messageForm.addEventListener("submit", sendMessage);
+  el.messagesList.addEventListener("click", startReply);
   el.refresh.addEventListener("click", () => {
     loadFriends();
     loadMessages();

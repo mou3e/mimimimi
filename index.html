@@ -1,0 +1,1327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AQF Corpus Browser Demo</title>
+<style>
+  :root {
+    --ink: #1b1916;
+    --text: #37332e;
+    --muted: #696157;
+    --paper: #f6f1e8;
+    --panel: #fffaf2;
+    --panel-2: #eee5d6;
+    --rule: #d2c5b2;
+    --oxide: #80321f;
+    --oxide-2: #b15a3d;
+    --blue: #294b62;
+    --sage: #4e665a;
+    --gold: #9f772b;
+    --charcoal: #25221e;
+    --shadow: 0 18px 55px rgba(27,25,22,.12);
+  }
+
+  * { box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    margin: 0;
+    color: var(--ink);
+    background:
+      linear-gradient(90deg, rgba(128,50,31,.07) 1px, transparent 1px),
+      linear-gradient(180deg, rgba(41,75,98,.055) 1px, transparent 1px),
+      var(--paper);
+    background-size: 44px 44px;
+    font-family: Georgia, "Times New Roman", serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  button,
+  input,
+  select {
+    font: inherit;
+  }
+
+  button {
+    cursor: pointer;
+  }
+
+  a {
+    color: inherit;
+  }
+
+  .app {
+    min-height: 100vh;
+  }
+
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 18px;
+    padding: 12px 26px;
+    border-bottom: 1px solid rgba(27,25,22,.14);
+    background: rgba(246,241,232,.92);
+    backdrop-filter: blur(14px);
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+  }
+
+  .brand-mark {
+    width: 34px;
+    height: 34px;
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+    border: 1px solid var(--oxide);
+    border-radius: 50%;
+    color: var(--oxide);
+    font: 700 13px Georgia, serif;
+  }
+
+  .brand-text {
+    min-width: 0;
+  }
+
+  .brand-text strong,
+  .brand-text span,
+  .nav a,
+  .mono {
+    font-family: "Segoe UI", Arial, sans-serif;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+
+  .brand-text strong {
+    display: block;
+    overflow: hidden;
+    color: var(--oxide);
+    font-size: 12px;
+    font-weight: 700;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .brand-text span {
+    display: block;
+    margin-top: 2px;
+    color: var(--muted);
+    font-size: 10px;
+    font-weight: 600;
+  }
+
+  .nav {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 6px;
+  }
+
+  .nav a {
+    padding: 8px 10px;
+    color: var(--muted);
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .nav a:hover {
+    color: var(--oxide);
+    background: rgba(128,50,31,.08);
+  }
+
+  .shell {
+    width: min(1420px, calc(100% - 36px));
+    margin: 0 auto;
+    padding: 28px 0 56px;
+  }
+
+  .workspace {
+    display: grid;
+    grid-template-columns: minmax(360px, .88fr) minmax(0, 1.35fr);
+    gap: 18px;
+    align-items: start;
+  }
+
+  .panel {
+    border: 1px solid var(--rule);
+    background: rgba(255,250,242,.92);
+    box-shadow: var(--shadow);
+  }
+
+  .left-panel {
+    position: sticky;
+    top: 74px;
+    max-height: calc(100vh - 94px);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .panel-head {
+    padding: 22px 22px 16px;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .eyebrow {
+    margin-bottom: 8px;
+    color: var(--oxide);
+    font: 700 11px "Segoe UI", Arial, sans-serif;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+  }
+
+  h1,
+  h2,
+  h3 {
+    margin: 0;
+    font-family: Georgia, "Times New Roman", serif;
+    letter-spacing: 0;
+  }
+
+  h1 {
+    font-size: clamp(2rem, 4.3vw, 4.6rem);
+    line-height: .98;
+    max-width: 820px;
+  }
+
+  h2 {
+    font-size: clamp(1.65rem, 2.6vw, 2.6rem);
+    line-height: 1.04;
+  }
+
+  h3 {
+    font-size: 1.22rem;
+    line-height: 1.14;
+  }
+
+  .subhead {
+    margin: 12px 0 0;
+    color: var(--muted);
+    font-size: 1.03rem;
+    line-height: 1.58;
+  }
+
+  .toolbar {
+    display: grid;
+    gap: 12px;
+    padding: 16px 22px;
+    border-bottom: 1px solid var(--rule);
+    background: rgba(238,229,214,.52);
+  }
+
+  .search-line {
+    position: relative;
+  }
+
+  .search-line svg {
+    position: absolute;
+    top: 50%;
+    left: 13px;
+    width: 17px;
+    height: 17px;
+    transform: translateY(-50%);
+    color: var(--oxide);
+  }
+
+  .search {
+    width: 100%;
+    min-height: 44px;
+    padding: 0 14px 0 40px;
+    color: var(--ink);
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    outline: 0;
+    background: var(--panel);
+    font-size: 1rem;
+  }
+
+  .search:focus {
+    border-color: var(--oxide-2);
+    box-shadow: 0 0 0 3px rgba(177,90,61,.14);
+  }
+
+  .filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .quick-queries {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .filter {
+    min-height: 32px;
+    padding: 0 11px;
+    border: 1px solid var(--rule);
+    border-radius: 999px;
+    color: var(--text);
+    background: rgba(255,250,242,.72);
+    font: 700 11px "Segoe UI", Arial, sans-serif;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+  }
+
+  .keyword {
+    min-height: 30px;
+    padding: 0 10px;
+    border: 1px dashed var(--rule);
+    border-radius: 999px;
+    color: var(--oxide);
+    background: rgba(255,250,242,.68);
+    font: 700 11px "Segoe UI", Arial, sans-serif;
+    letter-spacing: .03em;
+  }
+
+  .keyword:hover {
+    border-style: solid;
+    border-color: var(--oxide-2);
+    background: var(--panel);
+  }
+
+  .filter.active {
+    color: var(--panel);
+    border-color: var(--oxide);
+    background: var(--oxide);
+  }
+
+  .list-meta {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    color: var(--muted);
+    font: 700 11px "Segoe UI", Arial, sans-serif;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+
+  .record-list {
+    overflow: auto;
+    padding: 12px;
+  }
+
+  .record-card {
+    width: 100%;
+    display: grid;
+    gap: 12px;
+    margin-bottom: 10px;
+    padding: 16px;
+    text-align: left;
+    border: 1px solid rgba(210,197,178,.9);
+    border-radius: 6px;
+    color: var(--ink);
+    background: rgba(255,250,242,.84);
+  }
+
+  .record-card:hover,
+  .record-card.active {
+    border-color: var(--oxide-2);
+    background: var(--panel);
+  }
+
+  .record-card.active {
+    box-shadow: 0 8px 24px rgba(128,50,31,.12);
+  }
+
+  .record-topline {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  .record-card h3 {
+    max-width: 260px;
+  }
+
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    min-height: 22px;
+    padding: 0 8px;
+    color: var(--panel);
+    border-radius: 999px;
+    background: var(--sage);
+    font: 700 10px "Segoe UI", Arial, sans-serif;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .tag.print { background: var(--blue); }
+  .tag.primary { background: var(--oxide); }
+  .tag.lost { background: var(--gold); color: #fffaf2; }
+
+  .record-meta {
+    color: var(--muted);
+    font-size: .96rem;
+    line-height: 1.45;
+  }
+
+  .record-facts {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .fact {
+    min-height: 54px;
+    padding: 8px;
+    border: 1px solid rgba(210,197,178,.75);
+    background: rgba(238,229,214,.5);
+  }
+
+  .fact span {
+    display: block;
+    color: var(--oxide);
+    font: 700 10px "Segoe UI", Arial, sans-serif;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+
+  .fact strong {
+    display: block;
+    margin-top: 3px;
+    font-size: .95rem;
+    line-height: 1.2;
+  }
+
+  .empty {
+    display: none;
+    padding: 44px 22px;
+    color: var(--muted);
+    text-align: center;
+  }
+
+  .empty.show {
+    display: block;
+  }
+
+  .empty strong {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--ink);
+    font: 700 1.08rem Georgia, "Times New Roman", serif;
+  }
+
+  .empty span {
+    display: block;
+    max-width: 340px;
+    margin: 0 auto;
+    line-height: 1.5;
+  }
+
+  .right-stack {
+    display: grid;
+    gap: 18px;
+  }
+
+  .hero-panel {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 300px;
+    gap: 24px;
+    align-items: center;
+    padding: 30px;
+    overflow: hidden;
+  }
+
+  .hero-visual {
+    min-height: 280px;
+    display: grid;
+    place-items: center;
+    border-left: 1px solid var(--rule);
+  }
+
+  .seal {
+    width: min(250px, 78vw);
+    aspect-ratio: 1;
+    display: grid;
+    place-items: center;
+    border: 1px solid var(--rule);
+    border-radius: 50%;
+    background: radial-gradient(circle, #fffaf2 0 56%, #eee5d6 100%);
+  }
+
+  svg {
+    max-width: 100%;
+    height: auto;
+  }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1px;
+    border: 1px solid var(--rule);
+    background: var(--rule);
+  }
+
+  .stat {
+    min-height: 106px;
+    padding: 16px;
+    background: rgba(255,250,242,.94);
+  }
+
+  .stat strong {
+    display: block;
+    color: var(--oxide);
+    font-size: 2rem;
+    line-height: .95;
+  }
+
+  .stat span {
+    display: block;
+    margin-top: 10px;
+    color: var(--muted);
+    font: 700 11px "Segoe UI", Arial, sans-serif;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+
+  .detail {
+    padding: 0;
+    overflow: hidden;
+  }
+
+  .detail-placeholder {
+    min-height: 360px;
+    display: grid;
+    place-items: center;
+    padding: 34px;
+    text-align: center;
+    background:
+      radial-gradient(circle at 50% 35%, rgba(128,50,31,.08), transparent 42%),
+      rgba(255,250,242,.92);
+  }
+
+  .detail-placeholder-inner {
+    max-width: 560px;
+  }
+
+  .detail-placeholder h2 {
+    margin-bottom: 14px;
+  }
+
+  .detail-placeholder p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 1.05rem;
+    line-height: 1.6;
+  }
+
+  .contextual-hidden {
+    display: none;
+  }
+
+  .detail-head {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 16px;
+    align-items: start;
+    padding: 28px 30px;
+    color: #fffaf2;
+    background: var(--charcoal);
+  }
+
+  .detail-head p {
+    margin: 12px 0 0;
+    color: #d9cfbd;
+    font-size: 1rem;
+    line-height: 1.55;
+  }
+
+  .detail-badges {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+
+  .detail-body {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 320px;
+    gap: 0;
+  }
+
+  .fields {
+    padding: 22px 30px 30px;
+  }
+
+  .field {
+    display: grid;
+    grid-template-columns: 170px minmax(0, 1fr);
+    gap: 18px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .field:last-child {
+    border-bottom: 0;
+  }
+
+  .label {
+    color: var(--oxide);
+    font: 700 11px "Segoe UI", Arial, sans-serif;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+
+  .value {
+    color: var(--text);
+    font-size: 1.02rem;
+    line-height: 1.58;
+  }
+
+  .side {
+    padding: 22px;
+    border-left: 1px solid var(--rule);
+    background: rgba(238,229,214,.55);
+  }
+
+  .side-block + .side-block {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid var(--rule);
+  }
+
+  .side h3 {
+    margin-bottom: 12px;
+    font-size: 1.08rem;
+  }
+
+  .note-list {
+    display: grid;
+    gap: 10px;
+  }
+
+  .note {
+    padding: 12px;
+    border-left: 3px solid var(--oxide-2);
+    background: rgba(255,250,242,.78);
+    color: var(--text);
+    line-height: 1.5;
+  }
+
+  .editions {
+    display: grid;
+    gap: 8px;
+  }
+
+  .edition {
+    display: grid;
+    grid-template-columns: 70px minmax(0, 1fr) auto;
+    gap: 10px;
+    align-items: center;
+    padding: 10px;
+    border: 1px solid rgba(210,197,178,.9);
+    background: rgba(255,250,242,.8);
+  }
+
+  .edition.corpus {
+    border-color: var(--oxide-2);
+    box-shadow: inset 3px 0 0 var(--oxide);
+  }
+
+  .edition-no {
+    color: var(--oxide);
+    font: 700 11px "Segoe UI", Arial, sans-serif;
+    letter-spacing: .04em;
+  }
+
+  .edition-main {
+    min-width: 0;
+    color: var(--text);
+    font-size: .92rem;
+    line-height: 1.35;
+  }
+
+  .edition-main small {
+    display: block;
+    margin-top: 2px;
+    color: var(--muted);
+  }
+
+  .edition a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 28px;
+    padding: 0 9px;
+    border: 1px solid var(--oxide-2);
+    border-radius: 4px;
+    color: var(--oxide);
+    font: 700 10px "Segoe UI", Arial, sans-serif;
+    letter-spacing: .06em;
+    text-decoration: none;
+    text-transform: uppercase;
+  }
+
+  .edition a:hover {
+    color: var(--panel);
+    background: var(--oxide);
+  }
+
+  .timeline {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(155px, 1fr));
+    gap: 1px;
+    overflow-x: auto;
+    border: 1px solid var(--rule);
+    background: var(--rule);
+  }
+
+  .moment {
+    min-height: 142px;
+    padding: 16px;
+    background: rgba(255,250,242,.94);
+  }
+
+  .moment strong {
+    display: block;
+    margin-bottom: 10px;
+    color: var(--oxide);
+    font-size: 1.25rem;
+  }
+
+  .moment span {
+    color: var(--muted);
+    line-height: 1.42;
+  }
+
+  .compare {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1px;
+    border: 1px solid var(--rule);
+    background: var(--rule);
+  }
+
+  .compare-card {
+    padding: 18px;
+    background: rgba(255,250,242,.94);
+  }
+
+  .compare-card p {
+    margin: 10px 0 0;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  .section-title {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: end;
+    margin-bottom: 12px;
+  }
+
+  .section-title p {
+    max-width: 560px;
+    margin: 0;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  footer {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding: 26px 0 0;
+    color: var(--muted);
+    font: 700 11px "Segoe UI", Arial, sans-serif;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+
+  @media (max-width: 1120px) {
+    .workspace,
+    .hero-panel,
+    .detail-body {
+      grid-template-columns: 1fr;
+    }
+
+    .left-panel {
+      position: relative;
+      top: auto;
+      max-height: none;
+    }
+
+    .hero-visual,
+    .side {
+      border-left: 0;
+      border-top: 1px solid var(--rule);
+    }
+  }
+
+  @media (max-width: 780px) {
+    .topbar {
+      align-items: flex-start;
+      flex-direction: column;
+      padding: 12px 18px;
+    }
+
+    .nav {
+      justify-content: flex-start;
+      width: 100%;
+    }
+
+    .shell {
+      width: min(100% - 24px, 1420px);
+      padding-top: 18px;
+    }
+
+    .panel-head,
+    .hero-panel,
+    .detail-head,
+    .fields {
+      padding-left: 20px;
+      padding-right: 20px;
+    }
+
+    .stats,
+    .compare,
+    .record-facts {
+      grid-template-columns: 1fr;
+    }
+
+    .field {
+      grid-template-columns: 1fr;
+      gap: 6px;
+    }
+
+    .detail-head {
+      grid-template-columns: 1fr;
+    }
+
+    .detail-badges {
+      justify-content: flex-start;
+    }
+
+    .edition {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark">AQF</div>
+      <div class="brand-text">
+        <strong>Archives de la Querelle des femmes</strong>
+        <span>Corpus Browser Demo</span>
+      </div>
+    </div>
+    <nav class="nav" aria-label="Page sections">
+      <a href="#browser">Browser</a>
+      <a href="#record">Record</a>
+      <a href="#timeline">Timeline</a>
+      <a href="#compare">Compare</a>
+    </nav>
+  </header>
+
+  <main class="shell">
+    <section class="workspace" id="browser">
+      <aside class="panel left-panel" aria-label="Corpus controls and record list">
+        <div class="panel-head">
+          <div class="eyebrow">ROP 2026 / Contributor: Cameron</div>
+          <h1>Text Records</h1>
+          <p class="subhead">A compact corpus interface for edition history, transmission status, source records, and research notes.</p>
+        </div>
+
+        <div class="toolbar">
+          <label class="search-line" aria-label="Search records">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"></circle>
+              <path d="M16.5 16.5 21 21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+            </svg>
+            <input class="search" id="search" type="search" placeholder="Type a keyword to reveal records" autocomplete="off">
+          </label>
+
+          <div class="quick-queries" aria-label="Suggested keyword searches">
+            <button class="keyword" data-query="Boccaccio">Boccaccio</button>
+            <button class="keyword" data-query="women">women</button>
+            <button class="keyword" data-query="manuscript">manuscript</button>
+            <button class="keyword" data-query="1534">1534</button>
+          </div>
+
+          <div class="filters" aria-label="Transmission filters">
+            <button class="filter active" data-filter="all">All</button>
+            <button class="filter" data-filter="print">Print</button>
+            <button class="filter" data-filter="manuscript">Manuscript</button>
+            <button class="filter" data-filter="primary">Primary</button>
+          </div>
+
+          <div class="list-meta">
+            <span id="count">Enter a keyword</span>
+            <span id="activeFilter">All records</span>
+          </div>
+        </div>
+
+        <div class="record-list" id="recordList"></div>
+        <div class="empty" id="emptyState"></div>
+      </aside>
+
+      <div class="right-stack">
+        <section class="panel hero-panel" aria-label="Corpus overview">
+          <div>
+            <div class="eyebrow">Demo thesis</div>
+            <h2>From catalogue entry to research argument.</h2>
+            <p class="subhead">This prototype frames each record as evidence: who shaped the text, how it circulated, what editions survive, and why it belongs in a Querelle des femmes corpus.</p>
+          </div>
+          <div class="hero-visual" aria-hidden="true">
+            <div class="seal">
+              <svg width="210" height="210" viewBox="0 0 210 210" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="105" cy="105" r="94" fill="none" stroke="#80321f" stroke-width="2"/>
+                <circle cx="105" cy="105" r="80" fill="none" stroke="#9f772b" stroke-width="1"/>
+                <path d="M46 126 Q105 107 164 126 L164 67 Q105 47 46 67 Z" fill="none" stroke="#80321f" stroke-width="4" stroke-linejoin="round"/>
+                <line x1="105" y1="56" x2="105" y2="116" stroke="#80321f" stroke-width="3"/>
+                <path d="M62 80 Q82 72 99 78" stroke="#b15a3d" stroke-width="2" fill="none"/>
+                <path d="M111 78 Q131 72 149 80" stroke="#b15a3d" stroke-width="2" fill="none"/>
+                <text x="105" y="172" text-anchor="middle" font-family="Georgia, serif" font-size="34" font-weight="700" fill="#80321f" letter-spacing="3">AQF</text>
+              </svg>
+            </div>
+          </div>
+        </section>
+
+        <section class="stats contextual-hidden" id="statsBlock" aria-label="Corpus statistics">
+          <div class="stat"><strong id="statRecords">3</strong><span>records</span></div>
+          <div class="stat"><strong id="statPrint">2</strong><span>print traditions</span></div>
+          <div class="stat"><strong id="statManuscript">1</strong><span>manuscript only</span></div>
+          <div class="stat"><strong id="statEditions">11</strong><span>edition links</span></div>
+        </section>
+
+        <section class="panel detail" id="record" aria-live="polite"></section>
+
+        <section id="timeline" class="contextual-hidden">
+          <div class="section-title">
+            <div>
+              <div class="eyebrow">Le Cameron in focus</div>
+              <h2>Transmission timeline</h2>
+            </div>
+            <p>The record makes more sense when the title, translations, and publishers are seen as a sequence.</p>
+          </div>
+          <div class="timeline">
+            <div class="moment"><strong>1349-53</strong><span>Boccaccio writes the Italian Decameron.</span></div>
+            <div class="moment"><strong>1411-14</strong><span>Premierfait translates from a Latin intermediary for Jean de Berry.</span></div>
+            <div class="moment"><strong>1485</strong><span>Verard prints and reworks the text for a new reading public.</span></div>
+            <div class="moment"><strong>1534</strong><span>The corpus edition circulates as Le Cameron.</span></div>
+            <div class="moment"><strong>1545</strong><span>Le Macon translates directly from Italian and supersedes the older line.</span></div>
+          </div>
+        </section>
+
+        <section id="compare" class="contextual-hidden">
+          <div class="section-title">
+            <div>
+              <div class="eyebrow">Research angle</div>
+              <h2>Why the three records belong together</h2>
+            </div>
+          </div>
+          <div class="compare">
+            <article class="compare-card">
+              <h3>Le Cameron</h3>
+              <p>Shows how a translation becomes a publisher-shaped print object, and how women in the frame function as speakers and judges.</p>
+            </article>
+            <article class="compare-card">
+              <h3>Defensione delle donne</h3>
+              <p>Contrasts print circulation with manuscript survival, while keeping the pro-woman polemical tradition visible.</p>
+            </article>
+            <article class="compare-card">
+              <h3>Recueil des dames illustres</h3>
+              <p>Expands the corpus toward catalogues of exemplary women, shifting attention to packaging, attribution, and later editions.</p>
+            </article>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <footer>
+      <span>Archives de la Querelle des femmes / AQF</span>
+      <span>Sample corpus browser / 3 records / static HTML demo</span>
+    </footer>
+  </main>
+</div>
+
+<script>
+const RECORDS = [
+  {
+    id: "le-cameron",
+    primary: true,
+    transmission: "print",
+    title: "Le Cameron",
+    subtitle: "autrement dit Les Cent Nouvelles",
+    author: "Giovanni Boccaccio (Boccace)",
+    translator: "Laurent de Premierfait",
+    year: "1534",
+    genre: "Novella collection / frame narrative",
+    period: "French Renaissance print tradition; Middle French translation of a 14th-century Italian work",
+    circulation: "Print only in the corpus record; earliest known French print edition 1485",
+    description: "A sixteenth-century printed edition of Laurent de Premierfait's Middle French translation of Boccaccio's Decameron. The work is relevant to AQF because the frame places seven women at the center as speakers, judges, and interpreters of the stories.",
+    argument: "This record turns a bibliographic entry into a story about transmission: Premierfait's translation, Verard's print reworking, the 1534 corpus edition, and Le Macon's later direct translation from Italian.",
+    keywords: "boccaccio decameron cameron cent nouvelles premierfait verard le macon women narrators plague marriage sexuality print manuscript edition translation",
+    fields: [
+      ["Original title", "Le Cameron autrement dit Les Cent Nouvelles composees en langue latine par Jehan Bocace et mises en francoys par Laurens de premier faict."],
+      ["Translator / source", "Premierfait translated through a Latin intermediary, unlike Le Macon, who later translated directly from Italian."],
+      ["AQF relevance", "Women in the frame are not passive. They set themes, judge tales, and interpret stories."],
+      ["Title note", "Le Cameron preserves a transmission error: Decameron was read as de Cameron, as if de were the French preposition."]
+    ],
+    editions: [
+      ["70907", "1485", "Livre de cent nouvelles / Paris, Verard", "3 copies", "https://www.ustc.ac.uk/editions/70907", false],
+      ["61164", "[1503]", "Des cent nouvelles / Paris, Verard", "5 copies; Gallica copy", "https://www.ustc.ac.uk/editions/61164", false],
+      ["768440", "1521", "Livre de cent nouvelles / Paris, widow of M. Le Noir", "1 copy", "https://www.ustc.ac.uk/editions/768440", false],
+      ["37960", "1534", "Le cameron / Paris, Cousteau et Jean Petit", "4 copies; corpus focus", "https://www.ustc.ac.uk/editions/37960", true],
+      ["37558", "1537", "Le Cameron / Paris, Janot and Lotrian", "Confirmed through BP16", "https://www.ustc.ac.uk/editions/37558", false],
+      ["41398", "1541", "Le cameron / Paris, s.n.", "3 copies", "https://www.ustc.ac.uk/editions/41398", false]
+    ],
+    notes: [
+      "The old translation criticized by Le Macon's camp was likely the Verard print tradition, not simply Premierfait's manuscript version.",
+      "The publisher becomes central: Verard shaped the printed text, audience, illustration program, and meaning.",
+      "No digital copy is known for the 1534 corpus edition; a related Verard-line copy is available through Gallica."
+    ],
+    modern: "Boccace, Decameron, translation of Laurent de Premierfait, ed. G. Di Stefano, Montreal: CERES, 1998.",
+    heurist: "Author: Boccaccio / Translator: Premierfait / Primary external record: USTC 37960"
+  },
+  {
+    id: "defensione-donne",
+    primary: false,
+    transmission: "manuscript",
+    title: "Defensione delle donne",
+    subtitle: "contro i maledici loro calunniatori",
+    author: "Agostino Strozzi",
+    translator: "",
+    year: "ca. 1501",
+    genre: "Pro-woman polemical treatise",
+    period: "Early sixteenth-century Italian vernacular manuscript culture",
+    circulation: "Manuscript only; no print editions identified",
+    description: "A vernacular Italian defense of women against detractors. Its manuscript-only survival makes it a useful contrast to the heavily printed Decameron tradition.",
+    argument: "This record demonstrates that AQF needs to track both print abundance and manuscript scarcity, because both are forms of historical evidence.",
+    keywords: "agostino strozzi defensione donne defence women italian vernacular manuscript treatise querelle pro woman polemic florence milan",
+    fields: [
+      ["Transmission", "Manuscript only; no prints found."],
+      ["Shelfmarks", "Firenze, BNC, Ms Palatino 726; Milano, Braidense, Cod. A, D, IX, 27."],
+      ["AQF relevance", "A direct defense of women within the Querelle des femmes tradition."],
+      ["Corpus contrast", "Pairs well with Le Cameron because it shows an opposite survival pattern."]
+    ],
+    editions: [],
+    notes: [
+      "No print tradition has been identified, which makes manuscript description essential rather than secondary.",
+      "The record helps the demo show that a corpus browser is not just a list of digitized printed books."
+    ],
+    modern: "",
+    heurist: "Author: Agostino Strozzi / Transmission: manuscript only"
+  },
+  {
+    id: "recueil-dames",
+    primary: false,
+    transmission: "print",
+    title: "Le Recueil des dames illustres en vertu",
+    subtitle: "",
+    author: "Alexandre van den Busche (dit Sylvain de Flandres)",
+    translator: "",
+    year: "1574",
+    genre: "Catalogue of illustrious women / moral exemplary literature",
+    period: "French Renaissance print tradition; editions recorded through 1609",
+    circulation: "Print; first edition lacks a USTC record and some later editions are lost books",
+    description: "A French Renaissance catalogue of women celebrated for virtue, organized by exemplary qualities such as chastity, learning, charity, and martial courage.",
+    argument: "This record highlights unstable attribution and changing title packaging across editions.",
+    keywords: "van den busche sylvain flandres recueil dames illustres vertu women catalogue virtue querelle french renaissance lyon rouen moral sonnet",
+    fields: [
+      ["First edition", "1574; multiple editions followed to 1609."],
+      ["Shelfmark", "London, British Library: 8415 a 9 for the 1581 edition."],
+      ["AQF relevance", "A catalogue of virtuous women within the pro-woman tradition."],
+      ["Attribution", "The author's name varies significantly across sources; authority records matter."]
+    ],
+    editions: [
+      ["94485", "1575", "Recueil des dames illustres / Paris, Bonfons", "Lost book", "https://www.ustc.ac.uk/editions/94485", false],
+      ["93527", "1576", "Recueil des dames illustres / Paris, Bonfons", "Lost book", "https://www.ustc.ac.uk/editions/93527", false],
+      ["56213", "1581", "Le recueil des dames illustres / Lyon, Rigaud", "1 copy; British Library", "https://www.ustc.ac.uk/editions/56213", true],
+      ["6812207", "1603", "Sommaire des Dames illustres / Rouen, Le Villain", "2 copies", "https://www.ustc.ac.uk/editions/6812207", false],
+      ["3143543", "1609", "Sommaires des vies des hommes illustres / Rouen", "1 copy; Harvard Houghton", "https://www.ustc.ac.uk/editions/3143543", false]
+    ],
+    notes: [
+      "By 1603 the title shifts to Sommaire des Dames illustres; by 1609 it is packaged with lives of illustrious men.",
+      "This record is useful for explaining why authority control and title variants matter in early modern bibliography."
+    ],
+    modern: "In Eloges collectifs de femmes a la Renaissance francaise, ed. R.-C. Breitenstein et al., Saint-Etienne, 2021.",
+    heurist: "Author: Alexandre van den Busche / USTC 56213 for the 1581 edition"
+  }
+];
+
+const state = {
+  filter: "all",
+  query: "",
+  selected: null
+};
+
+const els = {
+  list: document.getElementById("recordList"),
+  detail: document.getElementById("record"),
+  search: document.getElementById("search"),
+  filters: Array.from(document.querySelectorAll(".filter")),
+  keywords: Array.from(document.querySelectorAll(".keyword")),
+  count: document.getElementById("count"),
+  activeFilter: document.getElementById("activeFilter"),
+  empty: document.getElementById("emptyState"),
+  statsBlock: document.getElementById("statsBlock"),
+  timeline: document.getElementById("timeline"),
+  compare: document.getElementById("compare"),
+  statRecords: document.getElementById("statRecords"),
+  statPrint: document.getElementById("statPrint"),
+  statManuscript: document.getElementById("statManuscript"),
+  statEditions: document.getElementById("statEditions")
+};
+
+function escapeHTML(value) {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;");
+}
+
+function matches(record) {
+  const filterMatch =
+    state.filter === "all" ||
+    record.transmission === state.filter ||
+    (state.filter === "primary" && record.primary);
+  const haystack = [
+    record.title,
+    record.subtitle,
+    record.author,
+    record.translator,
+    record.year,
+    record.genre,
+    record.period,
+    record.circulation,
+    record.keywords
+  ].join(" ").toLowerCase();
+  return filterMatch && haystack.includes(state.query);
+}
+
+function filteredRecords() {
+  if (!state.query) return [];
+  return RECORDS.filter(matches);
+}
+
+function renderStats() {
+  els.statRecords.textContent = RECORDS.length;
+  els.statPrint.textContent = RECORDS.filter(r => r.transmission === "print").length;
+  els.statManuscript.textContent = RECORDS.filter(r => r.transmission === "manuscript").length;
+  els.statEditions.textContent = RECORDS.reduce((sum, r) => sum + r.editions.length, 0);
+}
+
+function renderList() {
+  const items = filteredRecords();
+  const hasQuery = Boolean(state.query);
+
+  if (!hasQuery) {
+    state.selected = null;
+    els.list.innerHTML = "";
+    els.count.textContent = "Enter a keyword";
+    els.empty.innerHTML = `
+      <strong>Start with a keyword.</strong>
+      <span>Try Boccaccio, women, manuscript, print, 1534, Verard, or a title fragment.</span>
+    `;
+    els.empty.classList.add("show");
+    els.activeFilter.textContent = state.filter === "all" ? "All records" : `${state.filter} records`;
+    return;
+  }
+
+  if (!items.some(item => item.id === state.selected) && items.length) {
+    state.selected = items[0].id;
+  }
+
+  els.list.innerHTML = items.map(record => {
+    const active = record.id === state.selected ? " active" : "";
+    const transmissionClass = record.transmission === "print" ? "print" : "";
+    const subtitle = record.subtitle ? `<div class="record-meta"><em>${escapeHTML(record.subtitle)}</em></div>` : "";
+    return `
+      <button class="record-card${active}" data-id="${record.id}">
+        <div class="record-topline">
+          <div>
+            <h3>${escapeHTML(record.title)}</h3>
+            ${subtitle}
+          </div>
+          <span class="tag ${record.primary ? "primary" : transmissionClass}">${record.primary ? "Focus" : record.transmission}</span>
+        </div>
+        <div class="record-meta">${escapeHTML(record.author)}${record.translator ? " / trans. " + escapeHTML(record.translator) : ""}</div>
+        <div class="record-facts">
+          <div class="fact"><span>Year</span><strong>${escapeHTML(record.year)}</strong></div>
+          <div class="fact"><span>Mode</span><strong>${escapeHTML(record.transmission)}</strong></div>
+          <div class="fact"><span>Links</span><strong>${record.editions.length}</strong></div>
+        </div>
+      </button>
+    `;
+  }).join("");
+
+  els.count.textContent = `${items.length} record${items.length === 1 ? "" : "s"}`;
+  const filterText = state.filter === "all" ? "All records" : `${state.filter} records`;
+  els.activeFilter.textContent = filterText;
+  els.empty.innerHTML = `
+    <strong>No matching records.</strong>
+    <span>Try a broader keyword, or switch the filter back to All.</span>
+  `;
+  els.empty.classList.toggle("show", items.length === 0);
+
+  Array.from(document.querySelectorAll(".record-card")).forEach(card => {
+    card.addEventListener("click", () => {
+      state.selected = card.dataset.id;
+      render();
+      document.getElementById("record").scrollIntoView({ block: "nearest" });
+    });
+  });
+}
+
+function renderDetail() {
+  const items = filteredRecords();
+
+  if (!state.query) {
+    els.detail.innerHTML = `
+      <div class="detail-placeholder">
+        <div class="detail-placeholder-inner">
+          <div class="eyebrow">Search-first demo</div>
+          <h2>Enter a keyword to reveal matching records.</h2>
+          <p>This keeps the opening screen clean, then lets the record data appear only when the audience searches for a topic, author, date, or transmission feature.</p>
+        </div>
+      </div>
+    `;
+    return;
+  }
+
+  if (!items.length) {
+    els.detail.innerHTML = `
+      <div class="detail-placeholder">
+        <div class="detail-placeholder-inner">
+          <div class="eyebrow">No result</div>
+          <h2>No record matches this search.</h2>
+          <p>Use a broader term such as women, print, manuscript, Boccaccio, 1534, or Recueil.</p>
+        </div>
+      </div>
+    `;
+    return;
+  }
+
+  const record = RECORDS.find(item => item.id === state.selected) || items[0];
+
+  const badges = [
+    record.primary ? '<span class="tag primary">Primary focus</span>' : "",
+    `<span class="tag ${record.transmission === "print" ? "print" : ""}">${escapeHTML(record.transmission)}</span>`,
+    record.editions.some(e => /lost/i.test(e[3])) ? '<span class="tag lost">Lost-book evidence</span>' : ""
+  ].filter(Boolean).join("");
+
+  const fields = [
+    ["Author", record.author],
+    ["Translator", record.translator || "Not applicable"],
+    ["Date", record.year],
+    ["Genre", record.genre],
+    ["Period", record.period],
+    ["Circulation", record.circulation],
+    ...record.fields,
+    ["Research argument", record.argument],
+    ["Modern edition", record.modern || "No modern edition entered"],
+    ["Heurist linking", record.heurist]
+  ];
+
+  const editionHTML = record.editions.length
+    ? record.editions.map(edition => `
+      <div class="edition ${edition[5] ? "corpus" : ""}">
+        <div class="edition-no">${escapeHTML(edition[0])}</div>
+        <div class="edition-main">
+          <strong>${escapeHTML(edition[1])}</strong> ${escapeHTML(edition[2])}
+          <small>${escapeHTML(edition[3])}</small>
+        </div>
+        <a href="${edition[4]}" target="_blank" rel="noreferrer">USTC</a>
+      </div>
+    `).join("")
+    : '<div class="note">No print edition links entered for this manuscript-only record.</div>';
+
+  els.detail.innerHTML = `
+    <div class="detail-head">
+      <div>
+        <div class="eyebrow">Selected record</div>
+        <h2>${escapeHTML(record.title)}</h2>
+        ${record.subtitle ? `<p><em>${escapeHTML(record.subtitle)}</em></p>` : ""}
+        <p>${escapeHTML(record.description)}</p>
+      </div>
+      <div class="detail-badges">${badges}</div>
+    </div>
+    <div class="detail-body">
+      <div class="fields">
+        ${fields.map(field => `
+          <div class="field">
+            <div class="label">${escapeHTML(field[0])}</div>
+            <div class="value">${escapeHTML(field[1])}</div>
+          </div>
+        `).join("")}
+      </div>
+      <aside class="side">
+        <div class="side-block">
+          <h3>Edition trail</h3>
+          <div class="editions">${editionHTML}</div>
+        </div>
+        <div class="side-block">
+          <h3>Research notes</h3>
+          <div class="note-list">
+            ${record.notes.map(note => `<div class="note">${escapeHTML(note)}</div>`).join("")}
+          </div>
+        </div>
+      </aside>
+    </div>
+  `;
+}
+
+function renderFilters() {
+  els.filters.forEach(button => {
+    button.classList.toggle("active", button.dataset.filter === state.filter);
+  });
+}
+
+function render() {
+  renderStats();
+  renderFilters();
+  renderList();
+  renderDetail();
+  const showContext = Boolean(state.query) && filteredRecords().length > 0;
+  els.statsBlock.classList.toggle("contextual-hidden", !showContext);
+  els.timeline.classList.toggle("contextual-hidden", !showContext);
+  els.compare.classList.toggle("contextual-hidden", !showContext);
+}
+
+els.search.addEventListener("input", event => {
+  state.query = event.target.value.trim().toLowerCase();
+  render();
+});
+
+els.filters.forEach(button => {
+  button.addEventListener("click", () => {
+    state.filter = button.dataset.filter;
+    render();
+  });
+});
+
+els.keywords.forEach(button => {
+  button.addEventListener("click", () => {
+    state.query = button.dataset.query.toLowerCase();
+    els.search.value = button.dataset.query;
+    render();
+  });
+});
+
+render();
+</script>
+</body>
+</html>

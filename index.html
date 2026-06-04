@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -857,13 +858,16 @@
             <button class="keyword" data-query="women">women</button>
             <button class="keyword" data-query="manuscript">manuscript</button>
             <button class="keyword" data-query="1534">1534</button>
+            <button class="keyword" data-query="author">author</button>
+            <button class="keyword" data-query="Vandenbusche">Vandenbusche</button>
           </div>
 
           <div class="filters" aria-label="Transmission filters">
             <button class="filter active" data-filter="all">All</button>
+            <button class="filter" data-filter="text">Text</button>
+            <button class="filter" data-filter="author">Author</button>
             <button class="filter" data-filter="print">Print</button>
             <button class="filter" data-filter="manuscript">Manuscript</button>
-            <button class="filter" data-filter="primary">Primary</button>
           </div>
 
           <div class="list-meta">
@@ -899,9 +903,9 @@
         </section>
 
         <section class="stats contextual-hidden" id="statsBlock" aria-label="Corpus statistics">
-          <div class="stat"><strong id="statRecords">3</strong><span>records</span></div>
-          <div class="stat"><strong id="statPrint">2</strong><span>print traditions</span></div>
-          <div class="stat"><strong id="statManuscript">1</strong><span>manuscript only</span></div>
+          <div class="stat"><strong id="statRecords">5</strong><span>records</span></div>
+          <div class="stat"><strong id="statPrint">3</strong><span>text records</span></div>
+          <div class="stat"><strong id="statManuscript">2</strong><span>author records</span></div>
           <div class="stat"><strong id="statEditions">11</strong><span>edition links</span></div>
         </section>
 
@@ -960,6 +964,7 @@
 const RECORDS = [
   {
     id: "le-cameron",
+    type: "text",
     primary: true,
     transmission: "print",
     title: "Le Cameron",
@@ -970,11 +975,13 @@ const RECORDS = [
     genre: "Novella collection / frame narrative",
     period: "French Renaissance print tradition; Middle French translation of a 14th-century Italian work",
     circulation: "Print only in the corpus record; earliest known French print edition 1485",
-    description: "A sixteenth-century printed edition of Laurent de Premierfait's Middle French translation of Boccaccio's Decameron. The work is relevant to AQF because the frame places seven women at the center as speakers, judges, and interpreters of the stories.",
+    description: "A sixteenth-century printed edition of Laurent de Premierfait's Middle French translation of Boccaccio's Decameron. The frame narrative follows seven women and three men who withdraw from plague-stricken Florence and tell one hundred tales over ten days.",
     argument: "This record turns a bibliographic entry into a story about transmission: Premierfait's translation, Verard's print reworking, the 1534 corpus edition, and Le Macon's later direct translation from Italian.",
     keywords: "boccaccio decameron cameron cent nouvelles premierfait verard le macon women narrators plague marriage sexuality print manuscript edition translation",
     fields: [
       ["Original title", "Le Cameron autrement dit Les Cent Nouvelles composees en langue latine par Jehan Bocace et mises en francoys par Laurens de premier faict."],
+      ["Digital copy", "USTC 61164 lists a Gallica copy; the 1534 corpus edition, USTC 37960, has no confirmed digitisation."],
+      ["Databases consulted", "USTC, BP16, ARLIMA, BnF authority records for Boccaccio and Laurent de Premierfait."],
       ["Translator / source", "Premierfait translated through a Latin intermediary, unlike Le Macon, who later translated directly from Italian."],
       ["AQF relevance", "Women in the frame are not passive. They set themes, judge tales, and interpret stories."],
       ["Title note", "Le Cameron preserves a transmission error: Decameron was read as de Cameron, as if de were the French preposition."]
@@ -990,13 +997,15 @@ const RECORDS = [
     notes: [
       "The old translation criticized by Le Macon's camp was likely the Verard print tradition, not simply Premierfait's manuscript version.",
       "The publisher becomes central: Verard shaped the printed text, audience, illustration program, and meaning.",
-      "No digital copy is known for the 1534 corpus edition; a related Verard-line copy is available through Gallica."
+      "The corpus note [1499] most likely points to the earlier Antoine Verard printed tradition, corresponding to USTC 61164.",
+      "For Heurist, this record should link Boccaccio as author, Laurent de Premierfait as translator, and USTC 37960 as the primary external record."
     ],
     modern: "Boccace, Decameron, translation of Laurent de Premierfait, ed. G. Di Stefano, Montreal: CERES, 1998.",
     heurist: "Author: Boccaccio / Translator: Premierfait / Primary external record: USTC 37960"
   },
   {
     id: "defensione-donne",
+    type: "text",
     primary: false,
     transmission: "manuscript",
     title: "Defensione delle donne",
@@ -1007,18 +1016,23 @@ const RECORDS = [
     genre: "Pro-woman polemical treatise",
     period: "Early sixteenth-century Italian vernacular manuscript culture",
     circulation: "Manuscript only; no print editions identified",
-    description: "A vernacular Italian defense of women against detractors. Its manuscript-only survival makes it a useful contrast to the heavily printed Decameron tradition.",
+    description: "A vernacular Italian defense of women against detractors. The work circulated in manuscript form for nearly four centuries before its first printed edition in 1876.",
     argument: "This record demonstrates that AQF needs to track both print abundance and manuscript scarcity, because both are forms of historical evidence.",
     keywords: "agostino strozzi defensione donne defence women italian vernacular manuscript treatise querelle pro woman polemic florence milan",
     fields: [
       ["Transmission", "Manuscript only; no prints found."],
       ["Shelfmarks", "Firenze, BNC, Ms Palatino 726; Milano, Braidense, Cod. A, D, IX, 27."],
+      ["Digital copy", "Internet Archive has Ms Palatino 726 and Zambrini's 1876 modern printed edition."],
+      ["Databases consulted", "Gallica, USTC, ARLIMA, MIRABILE, and querelle.ca."],
       ["AQF relevance", "A direct defense of women within the Querelle des femmes tradition."],
+      ["Patronage context", "The text is linked to Margherita Cantelmo and positioned beside Mario Equicola's De mulieribus, commissioned by the same patron in 1501."],
       ["Corpus contrast", "Pairs well with Le Cameron because it shows an opposite survival pattern."]
     ],
     editions: [],
     notes: [
       "No print tradition has been identified, which makes manuscript description essential rather than secondary.",
+      "The Florentine manuscript may be autograph and contains a more extensive and radical defense of women than the 1876 edition.",
+      "The dedication to Margherita Cantelmo appears in the manuscript but not in the 1876 edition.",
       "The record helps the demo show that a corpus browser is not just a list of digitized printed books."
     ],
     modern: "",
@@ -1026,6 +1040,7 @@ const RECORDS = [
   },
   {
     id: "recueil-dames",
+    type: "text",
     primary: false,
     transmission: "print",
     title: "Le Recueil des dames illustres en vertu",
@@ -1035,14 +1050,17 @@ const RECORDS = [
     year: "1574",
     genre: "Catalogue of illustrious women / moral exemplary literature",
     period: "French Renaissance print tradition; editions recorded through 1609",
-    circulation: "Print; first edition lacks a USTC record and some later editions are lost books",
+    circulation: "Print; the 1574 first edition lacks a USTC record and some later editions are lost books",
     description: "A French Renaissance catalogue of women celebrated for virtue, organized by exemplary qualities such as chastity, learning, charity, and martial courage.",
     argument: "This record highlights unstable attribution and changing title packaging across editions.",
     keywords: "van den busche sylvain flandres recueil dames illustres vertu women catalogue virtue querelle french renaissance lyon rouen moral sonnet",
     fields: [
       ["First edition", "1574; multiple editions followed to 1609."],
       ["Shelfmark", "London, British Library: 8415 a 9 for the 1581 edition."],
+      ["Digital copy", "No digitized copy identified; microfilm available through French Books before 1601, roll 28."],
+      ["Databases consulted", "Gallica, USTC, ARLIMA, querelle.ca, French Vernacular Books before 1601."],
       ["AQF relevance", "A catalogue of virtuous women within the pro-woman tradition."],
+      ["Structure", "Examples of illustrious women are arranged by virtues such as chastity, conjugal love, learning, charity, and martial courage; each section closes with a sonnet."],
       ["Attribution", "The author's name varies significantly across sources; authority records matter."]
     ],
     editions: [
@@ -1054,10 +1072,80 @@ const RECORDS = [
     ],
     notes: [
       "By 1603 the title shifts to Sommaire des Dames illustres; by 1609 it is packaged with lives of illustrious men.",
+      "The same volume also includes a prose dialogue on honorable love and a poem titled Les Miseres du monde.",
+      "The 1581 Lyon edition is the only surviving early copy currently identified in the record set.",
       "This record is useful for explaining why authority control and title variants matter in early modern bibliography."
     ],
     modern: "In Eloges collectifs de femmes a la Renaissance francaise, ed. R.-C. Breitenstein et al., Saint-Etienne, 2021.",
     heurist: "Author: Alexandre van den Busche / USTC 56213 for the 1581 edition"
+  },
+  {
+    id: "agostino-strozzi-author",
+    type: "author",
+    primary: false,
+    transmission: "author",
+    title: "Agostino Strozzi",
+    subtitle: "birth name: Carlo Strozzi",
+    author: "Agostino Strozzi",
+    translator: "",
+    year: "ca. 1450-after 1505",
+    genre: "Author record / Augustinian abbot / humanist writer",
+    period: "Late fifteenth to early sixteenth century",
+    circulation: "Person record linked to a manuscript-only pro-woman treatise",
+    description: "Agostino Strozzi was an Augustinian abbot and humanist author associated with pro-woman polemics in the Italian Querelle des femmes. His Defensione delle donne is one of the major Italian defenses of women around 1501.",
+    argument: "This author record shows why the corpus needs person metadata as well as text metadata: Strozzi's religious role, humanist network, patronage ties, and works all shape how Defensione delle donne should be read.",
+    keywords: "agostino strozzi carlo strozzi augustinian abbot humanist ferrara matteo bossi margherita cantelmo defensione donne friendship modesty mantua querelle author record",
+    fields: [
+      ["Birth / death", "Born ca. 1450; death unknown, after 1505."],
+      ["Field of activity", "Religious life, Augustinian culture, humanist literary exchange, pro-woman polemics."],
+      ["Education and networks", "Educated at the University of Ferrara in the 1470s; correspondent of Matteo Bossi."],
+      ["Associated patron", "Margherita Cantelmo, also connected to Mario Equicola's De mulieribus."],
+      ["Databases consulted", "Gallica, SIEFAR, ARLIMA, USTC, querelle.ca."],
+      ["Works", "Defensione delle donne; Odae septem de septem verbis Domini in cruce pendentis; De raptu Pauli; Trattato di amicizia; treatise on modesty."]
+    ],
+    editions: [],
+    notes: [
+      "querelle.ca is the main source for the author biography.",
+      "USTC contains two other works by a possible later Agostino Strozzi, but James and Kent attribute those to a different author of the same name.",
+      "The author record should be linked directly to the Defensione delle donne text record."
+    ],
+    modern: "James and Kent, Margherita Cantelmo and Agostino Strozzi, I Tatti Studies in the Italian Renaissance 12 (2009).",
+    heurist: "Record type: Author / Linked text: Defensione delle donne contro i maledici loro calunniatori"
+  },
+  {
+    id: "vandenbusche-author",
+    type: "author",
+    primary: false,
+    transmission: "author",
+    title: "Alexandre van den Busche",
+    subtitle: "also Vandenbusche, Vanden Busche, Vanden Bussche, Alexandre Sylvain, Sylvain de Flandres",
+    author: "Alexandre van den Busche",
+    translator: "",
+    year: "ca. 1535-ca. 1585",
+    genre: "Author record / French-language poet",
+    period: "Late sixteenth century",
+    circulation: "Person record linked to French Renaissance printed works",
+    description: "Alexandre van den Busche, also known as Sylvain de Flandres, was a French-language poet and author of pro-woman literature within the Querelle des femmes. His identity appears under multiple name variants across bibliographic sources.",
+    argument: "This author record highlights the importance of authority control: the text record is difficult to stabilize unless the author's variant names are linked through a reliable authority record.",
+    keywords: "alexandre van den busche vandenbusche vanden bussche sylvain de flandres alexandre sylvain poet french renaissance recueil dames illustres le sylvain author variants bnf authority",
+    fields: [
+      ["Birth / death", "Born ca. 1535; died ca. 1585."],
+      ["Field of activity", "French-language poetry, rhetoric, moral literature, pro-woman writing."],
+      ["Authority control", "BnF authority record ark:/12148/cb125157777 confirms name variants and identifies him as a poet."],
+      ["Databases consulted", "Gallica / BnF authority, SIEFAR, ARLIMA, USTC, querelle.ca."],
+      ["Works", "Le Recueil des dames illustres en vertu; Le Sylvain; Dialogue d'amour honneste; Discours poetique des miseres de ce monde; Les Procez tragiques; Poeme et Anagrammes; L'Arithmetique militaire."],
+      ["Corpus issue", "Very little biographical information is available beyond approximate dates and nationality."]
+    ],
+    editions: [
+      ["342770", "1582", "Le Sylvain. Cinquante aenigmes francoises / Paris, Gilles Beys", "USTC author-linked work", "https://www.ustc.ac.uk/editions/342770", false]
+    ],
+    notes: [
+      "The author's name varies significantly across databases, making the BnF authority record the most reliable anchor.",
+      "The Recueil is a lesser-studied contribution to the French Renaissance Querelle des femmes.",
+      "This author record should be linked to the Recueil text record and its changing edition titles."
+    ],
+    modern: "BnF authority record; Cioranescu, Bibliographie de la litterature francaise du seizieme siecle; Provini, SFDES 2022.",
+    heurist: "Record type: Author / Linked text: Le Recueil des dames illustres en vertu"
   }
 ];
 
@@ -1096,6 +1184,7 @@ function escapeHTML(value) {
 function matches(record) {
   const filterMatch =
     state.filter === "all" ||
+    record.type === state.filter ||
     record.transmission === state.filter ||
     (state.filter === "primary" && record.primary);
   const haystack = [
@@ -1107,6 +1196,7 @@ function matches(record) {
     record.genre,
     record.period,
     record.circulation,
+    record.type,
     record.keywords
   ].join(" ").toLowerCase();
   return filterMatch && haystack.includes(state.query);
@@ -1119,8 +1209,8 @@ function filteredRecords() {
 
 function renderStats() {
   els.statRecords.textContent = RECORDS.length;
-  els.statPrint.textContent = RECORDS.filter(r => r.transmission === "print").length;
-  els.statManuscript.textContent = RECORDS.filter(r => r.transmission === "manuscript").length;
+  els.statPrint.textContent = RECORDS.filter(r => r.type === "text").length;
+  els.statManuscript.textContent = RECORDS.filter(r => r.type === "author").length;
   els.statEditions.textContent = RECORDS.reduce((sum, r) => sum + r.editions.length, 0);
 }
 
@@ -1134,7 +1224,7 @@ function renderList() {
     els.count.textContent = "Enter a keyword";
     els.empty.innerHTML = `
       <strong>Start with a keyword.</strong>
-      <span>Try Boccaccio, women, manuscript, print, 1534, Verard, or a title fragment.</span>
+      <span>Try Boccaccio, women, manuscript, print, author, 1534, Verard, or a title fragment.</span>
     `;
     els.empty.classList.add("show");
     els.activeFilter.textContent = state.filter === "all" ? "All records" : `${state.filter} records`;
@@ -1148,6 +1238,7 @@ function renderList() {
   els.list.innerHTML = items.map(record => {
     const active = record.id === state.selected ? " active" : "";
     const transmissionClass = record.transmission === "print" ? "print" : "";
+    const typeLabel = record.primary ? "Focus" : record.type;
     const subtitle = record.subtitle ? `<div class="record-meta"><em>${escapeHTML(record.subtitle)}</em></div>` : "";
     return `
       <button class="record-card${active}" data-id="${record.id}">
@@ -1156,12 +1247,12 @@ function renderList() {
             <h3>${escapeHTML(record.title)}</h3>
             ${subtitle}
           </div>
-          <span class="tag ${record.primary ? "primary" : transmissionClass}">${record.primary ? "Focus" : record.transmission}</span>
+          <span class="tag ${record.primary ? "primary" : transmissionClass}">${typeLabel}</span>
         </div>
         <div class="record-meta">${escapeHTML(record.author)}${record.translator ? " / trans. " + escapeHTML(record.translator) : ""}</div>
         <div class="record-facts">
           <div class="fact"><span>Year</span><strong>${escapeHTML(record.year)}</strong></div>
-          <div class="fact"><span>Mode</span><strong>${escapeHTML(record.transmission)}</strong></div>
+          <div class="fact"><span>Type</span><strong>${escapeHTML(record.type)}</strong></div>
           <div class="fact"><span>Links</span><strong>${record.editions.length}</strong></div>
         </div>
       </button>
@@ -1247,7 +1338,7 @@ function renderDetail() {
         <a href="${edition[4]}" target="_blank" rel="noreferrer">USTC</a>
       </div>
     `).join("")
-    : '<div class="note">No print edition links entered for this manuscript-only record.</div>';
+    : '<div class="note">No edition links entered for this record.</div>';
 
   els.detail.innerHTML = `
     <div class="detail-head">

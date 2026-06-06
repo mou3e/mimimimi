@@ -34,14 +34,15 @@ const text = {
 };
 
 const zoneLabels = {
-  "America/Toronto": "Canada / Toronto",
-  "America/New_York": "USA / New York",
-  "America/Los_Angeles": "USA / California",
-  "Asia/Shanghai": "China / Kunming",
-  "Europe/London": "UK / London",
-  "Europe/Paris": "France / Paris",
-  "Asia/Tokyo": "Japan / Tokyo",
-  "Australia/Sydney": "Australia / Sydney"
+  "America/Toronto": "\u52a0\u62ff\u5927",
+  "America/New_York": "\u7f8e\u56fd\uff08\u7ebd\u7ea6\uff09",
+  "America/Los_Angeles": "\u7f8e\u56fd\uff08\u52a0\u5dde\uff09",
+  "Asia/Shanghai": "\u4e2d\u56fd",
+  "Europe/London": "\u82f1\u56fd",
+  "Australia/Sydney": "\u6fb3\u5927\u5229\u4e9a",
+  "Pacific/Auckland": "\u65b0\u897f\u5170",
+  "Europe/Paris": "\u6cd5\u56fd",
+  "Asia/Tokyo": "\u65e5\u672c"
 };
 
 const el = {

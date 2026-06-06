@@ -17,8 +17,12 @@ const text = {
   noNote: "\u6ca1\u6709\u5c0f\u7eb8\u6761\u3002",
   noFriends: "\u8fd8\u6ca1\u6709\u670b\u53cb\u52a0\u5165\u3002",
   noMessages: "\u8fd8\u6ca1\u6709\u7559\u8a00\u3002",
+  noReplies: "\u8fd8\u6ca1\u6709\u56de\u590d\u3002",
   newFriend: "\u65b0\u670b\u53cb",
   messageSent: "\u7559\u8a00\u5df2\u53d1\u9001\u3002",
+  replySent: "\u56de\u590d\u5df2\u53d1\u9001\u3002",
+  deleteConfirm: "\u786e\u5b9a\u5220\u9664\u8fd9\u4e2a\u670b\u53cb\u6863\u6848\u5417\uff1f",
+  deleteOk: "\u670b\u53cb\u6863\u6848\u5df2\u5220\u9664\u3002",
   anonymous: "\u533f\u540d",
   updatedAt: "\u66f4\u65b0\u4e8e",
   deepNight: "\u6df1\u591c",
@@ -64,6 +68,8 @@ let client = null;
 let currentId = localStorage.getItem(storageKey);
 let rows = [];
 let messages = [];
+let replies = [];
+let activeReplyId = null;
 
 function setStatus(value, isError = false) {
   el.status.textContent = value;
@@ -126,7 +132,10 @@ function renderFriends() {
         <article class="friendCard">
           <div class="friendTop">
             <span class="avatar">${escapeHtml(friend.name).slice(0, 1).toUpperCase() || "?"}</span>
-            <span class="friendTime">${friend.time.label}</span>
+            <div class="friendTools">
+              <span class="friendTime">${friend.time.label}</span>
+              <button type="button" class="deleteFriendButton" data-friend-id="${escapeHtml(friend.id)}" data-friend-name="${escapeHtml(friend.name)}" title="删除档案" aria-label="删除 ${escapeHtml(friend.name)} 的档案">删除</button>
+            </div>
           </div>
           <strong class="friendName">${escapeHtml(friend.name)}</strong>
           <span class="friendMeta">${escapeHtml(friend.city)} · ${escapeHtml(friend.zoneLabel)}</span>
@@ -151,16 +160,49 @@ function renderMessages() {
 
   el.messagesList.innerHTML = messages
     .map((message) => {
+      const messageReplies = replies.filter((reply) => reply.message_id === message.id);
+      const repliesHtml = messageReplies.length
+        ? messageReplies
+            .map(
+              (reply) => `
+                <article class="replyItem">
+                  <div class="replyTop">
+                    <strong>${escapeHtml(reply.name || text.anonymous)}</strong>
+                    <small>${escapeHtml(shortTime(reply.created_at))}</small>
+                  </div>
+                  <p>${escapeHtml(reply.body)}</p>
+                </article>
+              `
+            )
+            .join("")
+        : `<p class="noReplies">${text.noReplies}</p>`;
+      const replyForm =
+        activeReplyId === message.id
+          ? `
+              <form class="inlineReplyForm" data-message-id="${escapeHtml(message.id)}">
+                <input class="replyNameInput" maxlength="24" value="${escapeHtml(el.messageName.value || el.name.value || "")}" placeholder="你的名字" />
+                <input class="replyBodyInput" required maxlength="160" placeholder="回复 ${escapeHtml(message.name || text.anonymous)}" />
+                <div class="replyFormActions">
+                  <button type="button" class="cancelReplyButton">取消</button>
+                  <button type="submit" class="sendReplyButton">发送回复</button>
+                </div>
+              </form>
+            `
+          : "";
       return `
         <article class="messageItem">
           <div class="messageTop">
             <strong>${escapeHtml(message.name || text.anonymous)}</strong>
             <div class="messageActions">
               <small>${escapeHtml(shortTime(message.created_at))}</small>
-              <button type="button" class="replyButton" data-reply-to="${escapeHtml(message.name || text.anonymous)}">回复</button>
+              <button type="button" class="replyButton" data-message-id="${escapeHtml(message.id)}">回复</button>
             </div>
           </div>
           <p>${escapeHtml(message.body)}</p>
+          <section class="repliesSection">
+            ${repliesHtml}
+            ${replyForm}
+          </section>
         </article>
       `;
     })
@@ -192,6 +234,17 @@ async function loadMessages() {
     return;
   }
   messages = data || [];
+  renderMessages();
+}
+
+async function loadReplies() {
+  if (!client) return;
+  const { data, error } = await client.from("message_replies").select("*").order("created_at", { ascending: true }).limit(500);
+  if (error) {
+    setStatus(`读取回复失败：${error.message}`, true);
+    return;
+  }
+  replies = data || [];
   renderMessages();
 }
 
@@ -234,15 +287,26 @@ async function saveProfile(event) {
     return;
   }
 
-  let result;
+  let result = { data: null, error: null };
   if (currentId) {
     result = await client.from("friend_status").update(payload).eq("id", currentId).select().maybeSingle();
-  } else {
-    result = await client.from("friend_status").insert(payload).select().single();
   }
 
   if (result.error || !result.data) {
-    result = await client.from("friend_status").insert(payload).select().single();
+    const { data: matchingRows, error: lookupError } = await client
+      .from("friend_status")
+      .select("id")
+      .ilike("name", payload.name)
+      .order("updated_at", { ascending: false })
+      .limit(1);
+
+    if (lookupError) {
+      result = { data: null, error: lookupError };
+    } else if (matchingRows?.length) {
+      result = await client.from("friend_status").update(payload).eq("id", matchingRows[0].id).select().single();
+    } else {
+      result = await client.from("friend_status").insert(payload).select().single();
+    }
   }
 
   if (result.error) {
@@ -254,6 +318,28 @@ async function saveProfile(event) {
   localStorage.setItem(storageKey, currentId);
   el.messageName.value = result.data.name || "";
   setStatus(text.saveOk);
+  await loadFriends();
+}
+
+async function deleteFriend(event) {
+  const button = event.target.closest(".deleteFriendButton");
+  if (!button || !client) return;
+
+  const friendName = button.dataset.friendName || "";
+  if (!window.confirm(`${text.deleteConfirm}\n${friendName}`)) return;
+
+  const friendId = button.dataset.friendId;
+  const { error } = await client.from("friend_status").delete().eq("id", friendId);
+  if (error) {
+    setStatus(`删除失败：${error.message}`, true);
+    return;
+  }
+
+  if (currentId === friendId) {
+    currentId = null;
+    localStorage.removeItem(storageKey);
+  }
+  setStatus(text.deleteOk);
   await loadFriends();
 }
 
@@ -284,16 +370,50 @@ async function sendMessage(event) {
   await loadMessages();
 }
 
-function startReply(event) {
+function handleMessageClick(event) {
+  const cancelButton = event.target.closest(".cancelReplyButton");
+  if (cancelButton) {
+    activeReplyId = null;
+    renderMessages();
+    return;
+  }
+
   const button = event.target.closest(".replyButton");
   if (!button) return;
+  activeReplyId = button.dataset.messageId;
+  renderMessages();
+  document.querySelector(".replyBodyInput")?.focus();
+}
 
-  const name = button.dataset.replyTo || text.anonymous;
-  const prefix = `@${name} `;
-  if (!el.message.value.startsWith(prefix)) {
-    el.message.value = `${prefix}${el.message.value}`.trimEnd();
+async function sendReply(event) {
+  const form = event.target.closest(".inlineReplyForm");
+  if (!form) return;
+  event.preventDefault();
+
+  if (!client) {
+    setStatus(text.noClient, true);
+    return;
   }
-  el.message.focus();
+
+  const name = form.querySelector(".replyNameInput").value.trim() || el.messageName.value.trim() || text.anonymous;
+  const body = form.querySelector(".replyBodyInput").value.trim();
+  if (!body) return;
+
+  const { error } = await client.from("message_replies").insert({
+    message_id: form.dataset.messageId,
+    name,
+    body,
+    created_at: new Date().toISOString()
+  });
+
+  if (error) {
+    setStatus(`发送回复失败：${error.message}`, true);
+    return;
+  }
+
+  activeReplyId = null;
+  setStatus(text.replySent);
+  await loadReplies();
 }
 
 function subscribeToChanges() {
@@ -301,6 +421,7 @@ function subscribeToChanges() {
     .channel("mimimimi-friends")
     .on("postgres_changes", { event: "*", schema: "public", table: "friend_status" }, loadFriends)
     .on("postgres_changes", { event: "*", schema: "public", table: "wall_messages" }, loadMessages)
+    .on("postgres_changes", { event: "*", schema: "public", table: "message_replies" }, loadReplies)
     .subscribe((status) => {
       if (status === "SUBSCRIBED") setStatus(text.realtimeOk);
     });
@@ -308,16 +429,20 @@ function subscribeToChanges() {
 
 function boot() {
   el.form.addEventListener("submit", saveProfile);
+  el.list.addEventListener("click", deleteFriend);
   el.messageForm.addEventListener("submit", sendMessage);
-  el.messagesList.addEventListener("click", startReply);
+  el.messagesList.addEventListener("click", handleMessageClick);
+  el.messagesList.addEventListener("submit", sendReply);
   el.refresh.addEventListener("click", () => {
     loadFriends();
     loadMessages();
+    loadReplies();
   });
   setInterval(() => {
     render();
     loadFriends();
     loadMessages();
+    loadReplies();
   }, 30000);
 
   if (!hasConfig) {
@@ -330,6 +455,7 @@ function boot() {
   loadOwnProfile();
   loadFriends();
   loadMessages();
+  loadReplies();
   subscribeToChanges();
 }
 

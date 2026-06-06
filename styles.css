@@ -254,6 +254,77 @@ select option {
   line-height: 1.55;
 }
 
+.repliesSection {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+  padding-left: 16px;
+  border-left: 2px solid rgba(114, 219, 199, 0.28);
+}
+
+.replyItem {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  background: rgba(8, 10, 18, 0.36);
+  padding: 10px;
+}
+
+.replyTop {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.replyTop small,
+.noReplies {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.replyItem p {
+  margin-top: 5px;
+}
+
+.noReplies {
+  margin: 0;
+}
+
+.inlineReplyForm {
+  display: grid;
+  grid-template-columns: minmax(110px, 0.3fr) minmax(0, 1fr);
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.replyFormActions {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.cancelReplyButton,
+.sendReplyButton {
+  min-height: 36px;
+  border-radius: 7px;
+  cursor: pointer;
+  font-weight: 750;
+  padding: 0 12px;
+}
+
+.cancelReplyButton {
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--muted);
+}
+
+.sendReplyButton {
+  border: 0;
+  background: var(--teal);
+  color: #07130f;
+}
+
 .friendCard {
   min-height: 190px;
   border: 1px solid var(--line);
@@ -267,6 +338,24 @@ select option {
   justify-content: space-between;
   gap: 10px;
   align-items: flex-start;
+}
+
+.friendTools {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.deleteFriendButton {
+  min-height: 30px;
+  border: 1px solid rgba(255, 139, 139, 0.28);
+  border-radius: 7px;
+  background: rgba(255, 139, 139, 0.08);
+  color: #ffb4b4;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 750;
+  padding: 0 9px;
 }
 
 .avatar {
@@ -353,6 +442,18 @@ select option {
 
   .messageForm {
     grid-template-columns: 1fr;
+  }
+
+  .inlineReplyForm {
+    grid-template-columns: 1fr;
+  }
+
+  .replyFormActions {
+    grid-column: auto;
+  }
+
+  .repliesSection {
+    padding-left: 10px;
   }
 
   .wide {
